@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assessment</title><link rel="stylesheet" href="css/style.css"></head><body>
+<header class="top"><h1 id="ttl"></h1><span id="qn"></span><span id="timer">--:--</span><button class="s" onclick="document.documentElement.requestFullscreen()">Fullscreen</button><button class="s" onclick="if(confirm('Leave? Progress is saved.'))location.href='candidate.html'">Exit</button></header>
+<div class="ws"><div id="prob"></div><div><select id="lang" style="width:auto" onchange="chLang()"><option>python</option><option>cpp</option><option>c</option><option>java</option></select> <button class="s" onclick="resetC()">Reset</button> <button class="s" onclick="rev()">Mark for review</button>
+<div id="ed"></div><p><button onclick="runC()">Run</button> <button onclick="runTests()">Run public tests</button> <button class="s" onclick="go(-1)">Previous</button> <button class="s" onclick="go(1)">Save &amp; Next</button> <button class="d" onclick="submitA()">Submit</button></p>
+<label>Custom input<textarea id="cin"></textarea></label><label>Output</label><pre id="out">Run code to see real output from the execution service.</pre></div></div>
+<script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/execution.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script><script src="js/assessment.js"></script></body></html>

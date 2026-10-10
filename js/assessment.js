@@ -1,0 +1,18 @@
+const U=requireRole('candidate'),D=DB.load(),T=D.attempts.find(t=>t.id===new URLSearchParams(location.search).get('a')&&t.uid===U.id);
+if(!T)location.href='candidate.html';const A=D.assessments.find(a=>a.id===T.aid);let qi=0,ed,$=id=>document.getElementById(id),sv=()=>DB.save(D),locked=T.status!=='in_progress';
+$('ttl').textContent=A.title;const Q=()=>A.questions[qi],R=()=>T.responses[Q().id]||(T.responses[Q().id]={lang:'python',code:Q().starter.python||''});
+function tick(){const l=T.deadline-Date.now();if(l<=0&&!locked){$('timer').textContent='00:00';finish();return}if(locked)return;$('timer').textContent=String(Math.floor(l/60000)).padStart(2,'0')+':'+String(Math.floor(l/1000)%60).padStart(2,'0')}setInterval(tick,1000);
+function show(){const q=Q(),r=R();$('qn').textContent=`Q${qi+1}/${A.questions.length}`+(T.review.includes(q.id)?' ★':'');$('prob').innerHTML=`<h2>${esc(q.title)}</h2><div style="white-space:pre-wrap">${esc(q.statement)}</div><h4>Sample input</h4><pre>${esc(q.sampleIn)}</pre><h4>Sample output</h4><pre>${esc(q.sampleOut)}</pre>`;$('lang').value=r.lang;if(ed){ed.setValue(r.code);monaco.editor.setModelLanguage(ed.getModel(),r.lang)}}
+require.config({paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'}});
+require(['vs/editor/editor.main'],()=>{ed=monaco.editor.create($('ed'),{value:'',language:'python',automaticLayout:true,minimap:{enabled:false}});ed.onDidChangeModelContent(()=>{if(!locked){R().code=ed.getValue();R().ts=Date.now();sv()}});ed.updateOptions({readOnly:locked});show()});
+function chLang(){const r=R();r.lang=$('lang').value;r.code=Q().starter[r.lang]||'';sv();show()}
+function resetC(){if(confirm('Reset code to starter?')){const r=R();r.code=Q().starter[r.lang]||'';sv();show()}}
+function rev(){const i=T.review.indexOf(Q().id);i<0?T.review.push(Q().id):T.review.splice(i,1);sv();show()}
+function go(d){sv();qi=Math.max(0,Math.min(A.questions.length-1,qi+d));show()}
+async function runC(){$('out').textContent='Running...';const r=await runCode(R().code,R().lang,$('cin').value);$('out').textContent=r.ok?`[${r.status}]\n${r.compile}${r.stdout}${r.stderr}`:r.error}
+async function runTests(){$('out').textContent='Running public tests...';const t=Q().tests.filter(x=>!x.hidden);let s='';for(const x of t){const r=await runCode(R().code,R().lang,x.in);if(!r.ok){s+=r.error;break}const p=r.id===3&&r.stdout.trim()===x.out.trim();s+=(p?'✔ PASS':'✘ FAIL')+` (input: ${x.in})\n`+(p?'':r.compile+r.stderr+'got: '+r.stdout+'\n')}$('out').textContent=s||'No public tests.'}
+async function submitA(){const ans=A.questions.filter(q=>T.responses[q.id]?.code?.trim()).length;if(!confirm(`Submit? Answered ${ans}/${A.questions.length}, marked for review ${T.review.length}, time left ${Math.max(0,Math.round((T.deadline-Date.now())/60000))} min.`))return;finish()}
+async function finish(){if(locked)return;locked=true;ed&&ed.updateOptions({readOnly:true});T.status='submitted';T.submitted=Date.now();sv();$('out').textContent='Submitted. Evaluating with execution service...';let marks=0,pend=false;
+for(const q of A.questions){const r=T.responses[q.id];if(!r||!r.code?.trim()){T.results[q.id]={passed:0,total:q.tests.length,marks:0,status:'empty'};continue}const x=await evalTests(r.code,r.lang,q.tests);if(x.status==='unavailable')pend=true;x.marks=x.status==='done'?+(q.marks*x.passed/(x.total||1)).toFixed(2):0;marks+=x.marks;T.results[q.id]=x}
+T.marks=pend?null:marks;T.evalStatus=pend?'unavailable':'done';sv();alert(pend?'Submitted. Evaluation is pending (execution service unavailable).':'Submitted.');location.href='candidate.html'}
+tick();

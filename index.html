@@ -1,0 +1,6 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DebugLab Assessment</title><link rel="stylesheet" href="css/style.css"></head><body>
+<main style="max-width:380px"><div class="card"><h1>DebugLab Assessment</h1>
+<form onsubmit="login(event)"><label for="u">Username</label><input id="u" autocomplete="username"><label for="p">Password</label><input id="p" type="password"><label><input type="checkbox" style="width:auto" onchange="p.type=this.checked?'text':'password'"> Show password</label>
+<p id="err" class="bad"></p><button>Log in</button></form>
+<p class="note">Demo only, insecure client-side login. Admin: <b>admin</b> / admin-demo. Candidate: <b>candidate</b> / candidate-demo. Real use needs server-side auth.</p></div></main>
+<script src="js/storage.js"></script><script src="js/auth.js"></script></body></html>
